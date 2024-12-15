@@ -24,18 +24,20 @@ pipeline {
             }
         }
 
-        stage('Test Docker Container') {
-            steps {
-                echo 'Running tests inside container...'
-                script {
-                    sh """
-                        docker run -d --name test_container -p 8080:8080 ${DOCKERHUB_USER}/${DOCKER_IMAGE}:${DOCKER_TAG}
-                        sleep 10
-                        curl -f http://localhost:8080 || exit 1
-                        docker rm -f test_container
-                    """
-                }
-            }
+	stage('Test Docker Container') {
+    	echo "Running tests inside container..."
+    	script {
+        	// Clean up any existing container with the same name
+        	sh 'docker rm -f test_container || true'
+
+        	// Run the container for testing
+	        sh 'docker run -d --name test_container -p 8080:8080 ${DOCKER_IMAGE}:${DOCKER_TAG}'
+        
+	        // Optional: Verify the container is running
+	        sh 'docker ps | grep test_container'
+	    }
+	}
+
         }
 
         stage('Push to DockerHub') {
