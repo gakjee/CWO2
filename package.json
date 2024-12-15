@@ -1,0 +1,12 @@
+{
+  "name": "devops-cw2",
+  "version": "1.0.0",
+  "description": "Node.js web app for DevOps CW2",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
