@@ -9,45 +9,50 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                echo "Checking out code..."
+                echo 'Checking out code...'
                 checkout scm
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                echo "Building Docker image..."
+                echo 'Building Docker image...'
                 script {
-                    dockerImage = docker.build("${DOCKER_IMAGE}:${DOCKER_TAG}")
+                    sh '''
+                        docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} .
+                    '''
                 }
             }
         }
 
         stage('Test Docker Container') {
             steps {
-                echo "Running tests inside container..."
+                echo 'Running tests inside container...'
                 script {
-                    // Clean up any existing container with the same name
-                    sh 'docker rm -f test_container || true'
-
-                    // Run container and perform simple checks
-                    sh 'docker run -d --name test_container -p 8081:8080 ${DOCKER_IMAGE}:${DOCKER_TAG}'
-                    
-                    // Optionally, add tests here such as curl checks
-                    sh 'sleep 5 && curl -f http://localhost:8080 || exit 1'
-
-                    // Stop and clean up test container
-                    sh 'docker rm -f test_container'
+                    sh '''
+                        # Remove existing container if it exists
+                        docker rm -f test_container || true
+                        
+                        # Run the container on a different port
+                        docker run -d --name test_container -p 8081:8080 ${DOCKER_IMAGE}:${DOCKER_TAG}
+                        
+                        # Allow time for container to start
+                        sleep 5
+                        
+                        # Test the application
+                        curl -f http://localhost:8081
+                    '''
                 }
             }
         }
 
         stage('Push to DockerHub') {
             steps {
-                echo "Pushing Docker image to DockerHub..."
+                echo 'Pushing Docker image to DockerHub...'
                 script {
                     docker.withRegistry('', 'dockerhub-credentials') {
-                        dockerImage.push("${DOCKER_TAG}")
+                        dockerImage = docker.build("${DOCKER_IMAGE}:${DOCKER_TAG}")
+                        dockerImage.push()
                     }
                 }
             }
@@ -56,10 +61,10 @@ pipeline {
 
     post {
         success {
-            echo "Pipeline completed successfully!"
+            echo 'Pipeline completed successfully!'
         }
         failure {
-            echo "Pipeline failed. Check the logs."
+            echo 'Pipeline failed. Check the logs.'
         }
     }
 }
