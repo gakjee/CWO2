@@ -31,7 +31,7 @@ pipeline {
                     sh 'docker rm -f test_container || true'
 
                     // Run container and perform simple checks
-                    sh 'docker run -d --name test_container -p 8080:8080 ${DOCKER_IMAGE}:${DOCKER_TAG}'
+                    sh 'docker run -d --name test_container -p 8081:8080 ${DOCKER_IMAGE}:${DOCKER_TAG}'
                     
                     // Optionally, add tests here such as curl checks
                     sh 'sleep 5 && curl -f http://localhost:8080 || exit 1'
