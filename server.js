@@ -8,7 +8,7 @@ var handleRequest = function(request, response) {
     response.writeHead(200);
     response.write('DevOps Coursework 2! | Running on: ');
     response.write(host);
-    response.end(' | v=0\n');
+    response.end(' | v=1\n');
 }
 var www = http.createServer(handleRequest);
 www.listen(8080, function() {
